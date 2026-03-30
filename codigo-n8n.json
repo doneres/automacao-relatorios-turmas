@@ -1,0 +1,167 @@
+{
+  "name": "relatorio-aulas",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d880dbd4-ec23-4ad3-84c8-4a3e619e14d4",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        -64
+      ],
+      "id": "d98ab95a-3fd1-45cb-8eb0-b8a10cbe6caf",
+      "name": "Webhook",
+      "webhookId": "d880dbd4-ec23-4ad3-84c8-4a3e619e14d4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.body.transcricao;\n\n// Remove timestamps e números de linha do SRT\nconst limpo = raw\n  .replace(/^\\d+$/gm, '')                          // remove números de linha\n  .replace(/\\d{2}:\\d{2}:\\d{2},\\d{3} --> \\d{2}:\\d{2}:\\d{2},\\d{3}/g, '') // remove timestamps\n  .replace(/\\n{2,}/g, '\\n')                         // remove linhas em branco duplas\n  .split('\\n')\n  .map(l => l.trim())\n  .filter(l => l.length > 3)                        // remove linhas muito curtas (ruído)\n  .join(' ');\n\nreturn [{\n  json: {\n    ambiente:     $input.first().json.body.ambiente,\n    turma:        $input.first().json.body.turma,\n    linkLoom:     $input.first().json.body.linkLoom,\n    linkSlides:   $input.first().json.body.linkSlides,\n    transcricao:  limpo,\n    data:         new Date().toLocaleDateString('pt-BR'),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "6531551a-722e-4e7d-a97b-196e3d72da73",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um assistente pedagógico especializado em criar relatórios de aula. Responda SEMPRE em português brasileiro. Responda APENAS com o texto do relatório formatado em Markdown. Não adicione nenhum comentário, explicação ou texto fora do relatório.\n\nCrie um relatório completo da aula com base na transcrição abaixo.\n\n**Dados da aula:**\n- Turma: {{ $json.turma }}\n- Data: {{ $json.data }}\n- Link da gravação: {{ $json.linkLoom }}\n- Link dos slides: {{ $json.linkSlides }}\n\n**Transcrição:**\n{{ $json.transcricao }}\n\n---\n\nO relatório deve seguir EXATAMENTE esta estrutura:\n\n*#[TURMA]*\n*Data:* [DATA]\n*Conteúdo:* [Título claro do assunto da aula em 1 linha]\n\n*Objetivos da aula:*\n- [Liste 4 a 6 objetivos de aprendizagem específicos]\n\n*Link da aula:* [LINK_LOOM]\n*Slides:* [LINK_SLIDES ou \"Feito com alunos no quadro.\" se vazio]\n\n*Atividade de casa:*\n*Teoria:* [Resumo teórico denso em 1 parágrafo]\n\n*Prática:* [Exercício prático numerado com 4 a 6 passos]\n\n*Conteúdos extras:*\n- [3 a 5 links reais de docs, vídeos ou artigos relacionados ao tema]\n\nProf. Douglas 🎮",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        176,
+        -64
+      ],
+      "id": "001aa7e0-634f-4829-b85e-f01c1272b121",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        48,
+        144
+      ],
+      "id": "5ac46200-d518-4ca1-aef0-1f279f571888",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HN1OhVjAoM2XoitR",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const relatorio = $json.output ?? $json.text ?? '';\n\nreturn [{\n  json: {\n    relatorio: relatorio.trim()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        -64
+      ],
+      "id": "8426784d-9b31-4862-bafe-dded01f4e9dc",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        736,
+        -64
+      ],
+      "id": "b6867dff-e30d-42d2-b8e1-2cd8fd801704",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1df9014b-2f35-4f61-a270-caa19c803bfe",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e720f61420e28f742fed223c54aa4d1012e4c88391682766f835aa982d1a4eaf"
+  },
+  "id": "jfANJ8TarZuAcTGo",
+  "tags": []
+}
