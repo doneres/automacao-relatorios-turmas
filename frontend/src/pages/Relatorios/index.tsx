@@ -43,19 +43,68 @@ export default function Relatorios() {
         transcricao: srtContent,
       };
 
-      const res = await fetch(N8N_WEBHOOKS[dados.ambiente], {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const webhook = N8N_WEBHOOKS[dados.ambiente];
+      if (!webhook)
+        throw new Error(`Webhook não configurado para ${dados.ambiente}`);
 
-      if (!res.ok) throw new Error(`Erro ${res.status}`);
-      const data = await res.json();
-      setRelatorio(data.relatorio ?? JSON.stringify(data, null, 2));
+      // Timeout de 5 minutos (AI pode demorar)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+
+      let res: Response;
+      try {
+        res = await fetch(webhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      // Lê como texto primeiro para debugar
+      const rawText = await res.text();
+
+      if (!res.ok) {
+        throw new Error(
+          `N8N retornou status ${res.status}: ${rawText || "(sem corpo)"}`,
+        );
+      }
+
+      if (!rawText || rawText.trim() === "") {
+        throw new Error(
+          "N8N retornou resposta vazia. Verifique se o nó 'Respond to Webhook' está no final do workflow e se o workflow está publicado (não em modo teste).",
+        );
+      }
+
+      let data: Record<string, unknown>;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(
+          `N8N retornou resposta inválida (não é JSON):\n${rawText.slice(0, 200)}`,
+        );
+      }
+
+      const texto = data.relatorio ?? data.output ?? data.text;
+      if (!texto || typeof texto !== "string") {
+        throw new Error(
+          `Campo 'relatorio' não encontrado. Resposta recebida:\n${JSON.stringify(data, null, 2)}`,
+        );
+      }
+
+      setRelatorio(texto);
     } catch (e: unknown) {
-      setErro(
-        `Falha ao conectar com o N8N: ${e instanceof Error ? e.message : "erro desconhecido"}`,
-      );
+      if (e instanceof Error && e.name === "AbortError") {
+        setErro(
+          "Timeout: o N8N demorou mais de 5 minutos para responder. Verifique o workflow.",
+        );
+      } else {
+        setErro(
+          `Falha: ${e instanceof Error ? e.message : "erro desconhecido"}`,
+        );
+      }
     } finally {
       setLoading(false);
     }

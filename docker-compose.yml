@@ -6,14 +6,12 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
 
-  frontend:
+  react:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "3000:80"
-    depends_on:
-      - n8n
 
 volumes:
   n8n_data:
