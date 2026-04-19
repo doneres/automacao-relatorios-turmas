@@ -20,7 +20,7 @@ function applyTheme(dark: boolean) {
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [isDark, setIsDark] = useState<boolean>(() => {
     // Padrão: CLARO. Só escuro se o usuário salvou explicitamente.
-    const saved = localStorage.getItem("cp-theme");
+    const saved = localStorage.getItem("cp-theme-v2");
     const dark = saved === "dark";
     applyTheme(dark); // aplica ANTES da primeira renderização
     return dark;
@@ -28,7 +28,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     applyTheme(isDark);
-    localStorage.setItem("cp-theme", isDark ? "dark" : "light");
+    localStorage.setItem("cp-theme-v2", isDark ? "dark" : "light");
   }, [isDark]);
 
   return (

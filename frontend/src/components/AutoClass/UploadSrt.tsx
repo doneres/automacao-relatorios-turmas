@@ -53,7 +53,7 @@ export default function UploadSrt({ arquivo, onArquivo, onErro }: Props) {
           ? "border-emerald-300 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/5 cursor-default"
           : dragging
           ? "border-brand/60 bg-brand/5 cursor-copy"
-          : "border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer"
+          : "border-gray-200 dark:border-slate-500 bg-gray-50 dark:bg-slate-600/50 hover:border-gray-300 dark:hover:border-slate-400 hover:bg-gray-100 dark:hover:bg-slate-600 cursor-pointer"
         }
       `}
     >

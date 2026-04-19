@@ -1,37 +1,6 @@
 import { Link } from "react-router";
-import { FileText, BookOpen, ArrowRight, ExternalLink, Zap, Users, Layers } from "lucide-react";
-import { getUserName } from "../../lib/storage";
-
-function StatCard({
-  label,
-  value,
-  sub,
-  icon: Icon,
-  colorClass,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  icon: React.ElementType;
-  colorClass: string;
-}) {
-  return (
-    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">
-            {label}
-          </p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-slate-100">{value}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{sub}</p>
-        </div>
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${colorClass}`}>
-          <Icon size={17} />
-        </div>
-      </div>
-    </div>
-  );
-}
+import { FileText, BookOpen, ArrowRight, ExternalLink } from "lucide-react";
+import { getUserName, getLinks } from "../../lib/storage";
 
 function FeatureCard({
   title,
@@ -51,14 +20,22 @@ function FeatureCard({
   return (
     <Link
       to={to}
-      className="group bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-6 hover:border-gray-300 dark:hover:border-slate-700 hover:shadow-sm transition-all duration-200 flex flex-col"
+      className="group bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl p-6 hover:border-gray-300 dark:hover:border-slate-500 hover:shadow-sm transition-all duration-200 flex flex-col"
     >
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${iconBg}`}>
+      <div
+        className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${iconBg}`}
+      >
         <Icon size={20} className={accentText} />
       </div>
-      <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100 mb-1.5">{title}</h3>
-      <p className="text-sm text-gray-500 dark:text-slate-400 flex-1 leading-relaxed">{description}</p>
-      <div className={`flex items-center gap-1.5 mt-4 text-sm font-medium ${accentText} opacity-0 group-hover:opacity-100 transition-opacity`}>
+      <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100 mb-1.5">
+        {title}
+      </h3>
+      <p className="text-sm text-gray-500 dark:text-slate-400 flex-1 leading-relaxed">
+        {description}
+      </p>
+      <div
+        className={`flex items-center gap-1.5 mt-4 text-sm font-medium ${accentText} opacity-0 group-hover:opacity-100 transition-opacity`}
+      >
         Acessar
         <ArrowRight size={14} />
       </div>
@@ -68,6 +45,7 @@ function FeatureCard({
 
 export default function Home() {
   const nome = getUserName();
+  const links = getLinks();
   const hoje = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "numeric",
@@ -75,7 +53,8 @@ export default function Home() {
   });
 
   const hora = new Date().getHours();
-  const saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
+  const saudacao =
+    hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
 
   return (
     <div className="p-6 lg:p-8">
@@ -86,36 +65,13 @@ export default function Home() {
             {hoje}
           </p>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
-            {saudacao}{nome ? `, ${nome}` : ""}
+            {saudacao}
+            {nome ? `, ${nome}` : ""}
           </h1>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
-            Automatize relatórios e monte conteúdos de aula com inteligência artificial.
+            Automatize relatórios e monte conteúdos de aula com inteligência
+            artificial.
           </p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <StatCard
-            label="Ferramentas"
-            value="6+"
-            sub="plataformas disponíveis"
-            icon={Layers}
-            colorClass="bg-brand/10 text-brand"
-          />
-          <StatCard
-            label="Módulos"
-            value="2"
-            sub="recursos ativos"
-            icon={Zap}
-            colorClass="bg-brand/10 text-brand"
-          />
-          <StatCard
-            label="Turmas"
-            value="—"
-            sub="configure no N8N"
-            icon={Users}
-            colorClass="bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500"
-          />
         </div>
 
         {/* Feature Cards */}
@@ -144,28 +100,38 @@ export default function Home() {
         </div>
 
         {/* Hub Link */}
-        <div>
-          <h2 className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-4">
-            Atalhos
-          </h2>
-          <a
-            href="https://doneres.dev/hub-acesso-rapido/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl px-5 py-4 hover:border-brand/30 hover:shadow-sm transition-all duration-200 w-full max-w-sm"
-          >
-            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-              <ExternalLink size={16} className="text-gray-400 dark:text-slate-400 group-hover:text-brand transition-colors" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 group-hover:text-brand transition-colors">
-                Hub de Acesso Rápido
-              </p>
-              <p className="text-xs text-gray-400 dark:text-slate-500 truncate">doneres.dev/hub-acesso-rapido</p>
-            </div>
-            <ArrowRight size={15} className="text-gray-300 dark:text-slate-600 group-hover:text-brand transition-colors shrink-0" />
-          </a>
-        </div>
+        {links.hubUrl && (
+          <div>
+            <h2 className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-4">
+              Atalhos
+            </h2>
+            <a
+              href={links.hubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-4 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl px-5 py-4 hover:border-brand/30 hover:shadow-sm transition-all duration-200 w-full max-w-sm"
+            >
+              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-slate-600 flex items-center justify-center shrink-0">
+                <ExternalLink
+                  size={16}
+                  className="text-gray-400 dark:text-slate-400 group-hover:text-brand transition-colors"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 group-hover:text-brand transition-colors">
+                  {links.hubLabel || "Hub de Acesso Rápido"}
+                </p>
+                <p className="text-xs text-gray-400 dark:text-slate-500 truncate">
+                  {links.hubUrl}
+                </p>
+              </div>
+              <ArrowRight
+                size={15}
+                className="text-gray-300 dark:text-slate-600 group-hover:text-brand transition-colors shrink-0"
+              />
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -18,14 +18,14 @@
   }
 
   html.dark {
-    /* Modo Escuro */
-    --background:       2   6   23;    /* slate-950 */
-    --card:             15  23  42;    /* slate-900 */
-    --muted:            30  41  59;    /* slate-800 */
-    --input:            30  41  59;    /* slate-800 */
-    --border:           30  41  59;    /* slate-800 */
-    --foreground:       241 245 249;   /* slate-100 */
-    --muted-foreground: 148 163 184;   /* slate-400 */
+    /* Modo Escuro (tom cinza médio — não muito escuro) */
+    --background:       30  41  59;    /* slate-800 */
+    --card:             51  65  85;    /* slate-700 */
+    --muted:            71  85  105;   /* slate-600 */
+    --input:            71  85  105;   /* slate-600 */
+    --border:           71  85  105;   /* slate-600 */
+    --foreground:       248 250 252;   /* slate-50  */
+    --muted-foreground: 203 213 225;   /* slate-300 */
   }
 
   html, body, #root {

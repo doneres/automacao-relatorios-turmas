@@ -36,17 +36,34 @@ import {
   saveWebhooksRelatorio,
   getWebhooksConteudo,
   saveWebhooksConteudo,
+  getLinks,
+  saveLinks,
   getTools,
   saveTools,
   ICON_OPTIONS,
   type Ferramenta,
   type WebhookConfig,
+  type LinksConfig,
 } from "../../lib/storage";
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  Grid3x3, Code2, Gamepad2, Globe, Cpu, Box,
-  Layers, BookOpen, Star, Wrench, Zap, Monitor,
-  Smartphone, Palette, Music, Pencil, Bot,
+  Grid3x3,
+  Code2,
+  Gamepad2,
+  Globe,
+  Cpu,
+  Box,
+  Layers,
+  BookOpen,
+  Star,
+  Wrench,
+  Zap,
+  Monitor,
+  Smartphone,
+  Palette,
+  Music,
+  Pencil,
+  Bot,
 };
 
 type Tab = "perfil" | "ambientes" | "ferramentas" | "sistema";
@@ -60,14 +77,14 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-3">
+    <h3 className="text-xs font-semibold text-black-400 dark:text-slate-500 uppercase tracking-wider mb-3">
       {children}
     </h3>
   );
 }
 
 const inputCls =
-  "w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-colors";
+  "w-full bg-gray-50 dark:bg-slate-600 border border-gray-200 dark:border-slate-500 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-400 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-colors";
 
 export default function Configuracao() {
   const { isDark, toggleTheme } = useTheme();
@@ -76,15 +93,23 @@ export default function Configuracao() {
   /* Perfil */
   const [nome, setNome] = useState(getUserName);
   const [nomeSaved, setNomeSaved] = useState(false);
-  const saveNome = () => { saveUserName(nome); setNomeSaved(true); setTimeout(() => setNomeSaved(false), 2000); };
+  const saveNome = () => {
+    saveUserName(nome);
+    setNomeSaved(true);
+    setTimeout(() => setNomeSaved(false), 2000);
+  };
 
   /* Ambientes */
-  const [whRelatorio, setWhRelatorio] = useState<WebhookConfig>(getWebhooksRelatorio);
-  const [whConteudo, setWhConteudo] = useState<WebhookConfig>(getWebhooksConteudo);
+  const [whRelatorio, setWhRelatorio] =
+    useState<WebhookConfig>(getWebhooksRelatorio);
+  const [whConteudo, setWhConteudo] =
+    useState<WebhookConfig>(getWebhooksConteudo);
+  const [links, setLinks] = useState<LinksConfig>(getLinks);
   const [webhookSaved, setWebhookSaved] = useState(false);
   const saveWebhooks = () => {
     saveWebhooksRelatorio(whRelatorio);
     saveWebhooksConteudo(whConteudo);
+    saveLinks(links);
     setWebhookSaved(true);
     setTimeout(() => setWebhookSaved(false), 2000);
   };
@@ -92,11 +117,15 @@ export default function Configuracao() {
   /* Ferramentas */
   const [tools, setTools] = useState<Ferramenta[]>(getTools);
   const [novaFerramenta, setNovaFerramenta] = useState<Omit<Ferramenta, "id">>({
-    nome: "", descricao: "", icone: "Wrench",
+    nome: "",
+    descricao: "",
+    icone: "Wrench",
   });
   const [addMode, setAddMode] = useState(false);
 
-  useEffect(() => { saveTools(tools); }, [tools]);
+  useEffect(() => {
+    saveTools(tools);
+  }, [tools]);
 
   const addTool = () => {
     if (!novaFerramenta.nome.trim()) return;
@@ -107,29 +136,32 @@ export default function Configuracao() {
 
   const removeTool = (id: string) => setTools(tools.filter((t) => t.id !== id));
 
-  const ambs: (keyof WebhookConfig)[] = ["PROD", "HML", "DEV"];
+  const ambs: (keyof WebhookConfig)[] = ["PROD", "DEV"];
 
   return (
     <div className="p-6 lg:p-8">
       <div className="max-w-2xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Configurações</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
+            Configurações
+          </h1>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
             Personalize o ambiente, perfil e ferramentas da aplicação.
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 dark:bg-slate-800/50 rounded-xl p-1 mb-6">
+        <div className="flex gap-1 bg-gray-100 dark:bg-slate-600/50 rounded-xl p-1 mb-6">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setTab(id)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium transition-all duration-150
-                ${tab === id
-                  ? "bg-white dark:bg-slate-800 text-brand shadow-sm border border-gray-200 dark:border-slate-700"
-                  : "text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+                ${
+                  tab === id
+                    ? "bg-white dark:bg-slate-600 text-brand shadow-sm border border-gray-200 dark:border-slate-500"
+                    : "text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
                 }`}
             >
               <Icon size={13} />
@@ -140,7 +172,7 @@ export default function Configuracao() {
 
         {/* ── PERFIL ── */}
         {tab === "perfil" && (
-          <div className="space-y-5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-6">
+          <div className="space-y-5 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl p-6">
             <SectionTitle>Identificação</SectionTitle>
             <div>
               <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
@@ -168,11 +200,13 @@ export default function Configuracao() {
               </p>
             </div>
 
-            <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
+            <div className="pt-4 border-t border-gray-100 dark:border-slate-600">
               <SectionTitle>Aparência</SectionTitle>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-800 dark:text-slate-200">Modo Noturno</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-slate-200">
+                    Modo Noturno
+                  </p>
                   <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
                     {isDark ? "Tema escuro ativado" : "Tema claro ativado"}
                   </p>
@@ -202,8 +236,8 @@ export default function Configuracao() {
 
         {/* ── AMBIENTES ── */}
         {tab === "ambientes" && (
-          <div className="space-y-5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-6">
-            <SectionTitle>Webhooks N8N — Relatórios</SectionTitle>
+          <div className="space-y-5 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl p-6">
+            <SectionTitle>Relatórios</SectionTitle>
             {ambs.map((amb) => (
               <div key={`rel-${amb}`}>
                 <label className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
@@ -213,14 +247,16 @@ export default function Configuracao() {
                   type="url"
                   placeholder={`http://localhost:5678/webhook/${amb.toLowerCase()}/...`}
                   value={whRelatorio[amb]}
-                  onChange={(e) => setWhRelatorio({ ...whRelatorio, [amb]: e.target.value })}
+                  onChange={(e) =>
+                    setWhRelatorio({ ...whRelatorio, [amb]: e.target.value })
+                  }
                   className={inputCls}
                 />
               </div>
             ))}
 
-            <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
-              <SectionTitle>Webhooks N8N — Conteúdo de Aula</SectionTitle>
+            <div className="pt-4 border-t border-gray-100 dark:border-slate-600">
+              <SectionTitle>Conteúdo de Aula</SectionTitle>
               {ambs.map((amb) => (
                 <div key={`cnt-${amb}`} className="mb-3 last:mb-0">
                   <label className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
@@ -230,11 +266,47 @@ export default function Configuracao() {
                     type="url"
                     placeholder={`http://localhost:5678/webhook/${amb.toLowerCase()}/conteudo`}
                     value={whConteudo[amb]}
-                    onChange={(e) => setWhConteudo({ ...whConteudo, [amb]: e.target.value })}
+                    onChange={(e) =>
+                      setWhConteudo({ ...whConteudo, [amb]: e.target.value })
+                    }
                     className={inputCls}
                   />
                 </div>
               ))}
+            </div>
+
+            <div className="pt-4 border-t border-gray-100 dark:border-slate-600">
+              <SectionTitle>Links Externos</SectionTitle>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+                    Label do Hub
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Hub de Acesso Rápido"
+                    value={links.hubLabel}
+                    onChange={(e) =>
+                      setLinks({ ...links, hubLabel: e.target.value })
+                    }
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+                    URL do Hub
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://doneres.dev/hub-acess-rapido/"
+                    value={links.hubUrl}
+                    onChange={(e) =>
+                      setLinks({ ...links, hubUrl: e.target.value })
+                    }
+                    className={inputCls}
+                  />
+                </div>
+              </div>
             </div>
 
             <button
@@ -242,14 +314,14 @@ export default function Configuracao() {
               className="flex items-center gap-2 w-full justify-center py-2.5 bg-brand-gradient text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity"
             >
               <Save size={15} />
-              {webhookSaved ? "Salvo!" : "Salvar Webhooks"}
+              {webhookSaved ? "Salvo!" : "Salvar Configurações"}
             </button>
           </div>
         )}
 
         {/* ── FERRAMENTAS ── */}
         {tab === "ferramentas" && (
-          <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-6">
+          <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <SectionTitle>Ferramentas cadastradas</SectionTitle>
               <button
@@ -263,34 +335,51 @@ export default function Configuracao() {
 
             {/* Add form */}
             {addMode && (
-              <div className="mb-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 space-y-3">
+              <div className="mb-4 p-4 bg-gray-50 dark:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-500 space-y-3">
                 <input
                   type="text"
                   placeholder="Nome da ferramenta (ex: Godot)"
                   value={novaFerramenta.nome}
-                  onChange={(e) => setNovaFerramenta({ ...novaFerramenta, nome: e.target.value })}
+                  onChange={(e) =>
+                    setNovaFerramenta({
+                      ...novaFerramenta,
+                      nome: e.target.value,
+                    })
+                  }
                   className={inputCls}
                 />
                 <input
                   type="text"
                   placeholder="Descrição curta"
                   value={novaFerramenta.descricao}
-                  onChange={(e) => setNovaFerramenta({ ...novaFerramenta, descricao: e.target.value })}
+                  onChange={(e) =>
+                    setNovaFerramenta({
+                      ...novaFerramenta,
+                      descricao: e.target.value,
+                    })
+                  }
                   className={inputCls}
                 />
                 <div>
-                  <label className="text-xs text-gray-400 dark:text-slate-500 mb-1.5 block">Ícone</label>
+                  <label className="text-xs text-gray-400 dark:text-slate-500 mb-1.5 block">
+                    Ícone
+                  </label>
                   <div className="flex flex-wrap gap-2">
                     {ICON_OPTIONS.filter((i) => ICON_MAP[i]).map((iconId) => {
                       const Icon = ICON_MAP[iconId];
                       return (
                         <button
                           key={iconId}
-                          onClick={() => setNovaFerramenta({ ...novaFerramenta, icone: iconId })}
+                          onClick={() =>
+                            setNovaFerramenta({
+                              ...novaFerramenta,
+                              icone: iconId,
+                            })
+                          }
                           className={`p-2 rounded-lg border transition-all ${
                             novaFerramenta.icone === iconId
                               ? "bg-brand/10 border-brand/30 text-brand"
-                              : "bg-gray-100 dark:bg-slate-700 border-transparent text-gray-400 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-600"
+                              : "bg-gray-100 dark:bg-slate-700 border-transparent text-gray-400 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-400"
                           }`}
                           title={iconId}
                         >
@@ -324,14 +413,18 @@ export default function Configuracao() {
                 return (
                   <div
                     key={tool.id}
-                    className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800/50 rounded-lg border border-gray-100 dark:border-slate-700/50"
+                    className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-600/50 rounded-lg border border-gray-100 dark:border-slate-500/50"
                   >
                     <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
                       <Icon size={15} className="text-brand" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 dark:text-slate-200 truncate">{tool.nome}</p>
-                      <p className="text-xs text-gray-400 dark:text-slate-500 truncate">{tool.descricao}</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-slate-200 truncate">
+                        {tool.nome}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 truncate">
+                        {tool.descricao}
+                      </p>
                     </div>
                     <button
                       onClick={() => removeTool(tool.id)}
@@ -354,17 +447,23 @@ export default function Configuracao() {
 
         {/* ── SISTEMA ── */}
         {tab === "sistema" && (
-          <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-6 space-y-4">
+          <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl p-6 space-y-4">
             <SectionTitle>Informações</SectionTitle>
             <div className="space-y-3">
               {[
                 ["Versão", "1.0.0"],
-                ["Plataforma", "CTRL+PLAY"],
-                ["Backend", "N8N + Google Gemini"],
+                ["Plataforma", "AutoClass"],
               ].map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-800 last:border-0">
-                  <span className="text-sm text-gray-500 dark:text-slate-400">{k}</span>
-                  <span className="text-sm font-medium text-gray-800 dark:text-slate-200">{v}</span>
+                <div
+                  key={k}
+                  className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-600 last:border-0"
+                >
+                  <span className="text-sm text-gray-500 dark:text-slate-400">
+                    {k}
+                  </span>
+                  <span className="text-sm font-medium text-gray-800 dark:text-slate-200">
+                    {v}
+                  </span>
                 </div>
               ))}
             </div>
@@ -372,31 +471,50 @@ export default function Configuracao() {
             <div className="pt-2">
               <SectionTitle>Links</SectionTitle>
               <div className="space-y-2">
-                <a
-                  href="https://doneres.dev/hub-acesso-rapido/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-brand hover:underline"
-                >
-                  <ExternalLink size={14} />
-                  Hub de Acesso Rápido
-                </a>
-                <a
-                  href="http://localhost:5678"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-brand hover:underline"
-                >
-                  <ExternalLink size={14} />
-                  N8N Dashboard (local)
-                </a>
+                {links.hubUrl && (
+                  <a
+                    href={links.hubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-brand hover:underline"
+                  >
+                    <ExternalLink size={14} />
+                    {links.hubLabel || "Hub de Acesso Rápido"}
+                  </a>
+                )}
+                {links.n8nUrl && (
+                  <a
+                    href={links.n8nUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-brand hover:underline"
+                  >
+                    <ExternalLink size={14} />
+                    N8N Dashboard
+                  </a>
+                )}
+                {!links.hubUrl && !links.n8nUrl && (
+                  <p className="text-xs text-gray-400 dark:text-slate-500">
+                    Nenhum link configurado. Configure em{" "}
+                    <button
+                      onClick={() => setTab("ambientes")}
+                      className="text-brand hover:underline"
+                    >
+                      Ambientes &gt; Links Externos
+                    </button>
+                    .
+                  </p>
+                )}
               </div>
             </div>
 
-            <div className="pt-2 border-t border-gray-100 dark:border-slate-800">
-              <Bell size={13} className="inline mr-1.5 text-gray-400 dark:text-slate-500" />
+            <div className="pt-2 border-t border-gray-100 dark:border-slate-600">
+              <Bell
+                size={13}
+                className="inline mr-1.5 text-gray-400 dark:text-slate-500"
+              />
               <span className="text-xs text-gray-400 dark:text-slate-500">
-                © 2026 CTRL+PLAY. Todos os direitos reservados.
+                © 2026 doneres. Todos os direitos reservados.
               </span>
             </div>
           </div>

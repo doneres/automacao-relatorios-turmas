@@ -13,7 +13,7 @@ interface Props {
 }
 
 const inputCls =
-  "w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-colors";
+  "w-full bg-gray-50 dark:bg-slate-600 border border-gray-200 dark:border-slate-500 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-400 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-colors";
 
 const labelCls =
   "block text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1.5";
@@ -22,7 +22,7 @@ export default function FormularioAula({ dados, onChange, onErro, onGerar, loadi
   const amb = AMBIENTE_CONFIG[dados.ambiente];
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5 flex flex-col gap-4 overflow-y-auto">
+    <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl p-5 flex flex-col gap-4 overflow-y-auto">
       <div>
         <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Dados da Aula</h2>
         <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Preencha os campos abaixo para iniciar.</p>
@@ -37,7 +37,7 @@ export default function FormularioAula({ dados, onChange, onErro, onGerar, loadi
           className={`${inputCls} cursor-pointer appearance-none`}
         >
           {(Object.keys(AMBIENTE_CONFIG) as Ambiente[]).map((a) => (
-            <option key={a} value={a} className="bg-white dark:bg-slate-800">
+            <option key={a} value={a} className="bg-white dark:bg-slate-600">
               {AMBIENTE_CONFIG[a].label}
             </option>
           ))}

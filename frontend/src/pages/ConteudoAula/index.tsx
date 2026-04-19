@@ -19,7 +19,7 @@ const NIVEIS = ["Iniciante", "Intermediário", "Avançado"];
 const AMBIENTES: Ambiente[] = ["PROD", "DEV"];
 
 const inputCls =
-  "w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-colors";
+  "w-full bg-gray-50 dark:bg-slate-600 border border-gray-200 dark:border-slate-500 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-400 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-colors";
 
 const labelCls =
   "block text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1.5";
@@ -40,7 +40,7 @@ function ToolCard({
       className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-left transition-all duration-150
         ${selected
           ? "bg-brand/10 border-brand/30 text-brand"
-          : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-600 hover:text-gray-800 dark:hover:text-slate-300"
+          : "bg-gray-50 dark:bg-slate-600 border-gray-200 dark:border-slate-500 text-gray-600 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-400 hover:text-gray-800 dark:hover:text-slate-300"
         }`}
     >
       <Icon size={16} className="shrink-0" />
@@ -149,7 +149,7 @@ export default function ConteudoAula() {
         <Link
           to="/configuracoes"
           onClick={() => {}}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-brand bg-gray-100 dark:bg-slate-800 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-brand bg-gray-100 dark:bg-slate-600 rounded-lg transition-colors"
           title="Gerenciar ferramentas"
         >
           <Settings size={13} />
@@ -159,13 +159,13 @@ export default function ConteudoAula() {
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
         {/* Formulário */}
-        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5 flex flex-col gap-4 overflow-y-auto">
+        <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl p-5 flex flex-col gap-4 overflow-y-auto">
 
           {/* Ferramenta */}
           <div>
             <label className={labelCls}>Ferramenta</label>
             {tools.length === 0 ? (
-              <div className="text-sm text-gray-400 dark:text-slate-500 bg-gray-50 dark:bg-slate-800 rounded-lg p-4 text-center">
+              <div className="text-sm text-gray-400 dark:text-slate-500 bg-gray-50 dark:bg-slate-600 rounded-lg p-4 text-center">
                 Nenhuma ferramenta cadastrada.{" "}
                 <Link to="/configuracoes" className="text-brand hover:underline">
                   Adicionar em Configurações.
@@ -208,7 +208,7 @@ export default function ConteudoAula() {
                   className={`flex-1 py-2 text-xs font-medium rounded-lg border transition-all duration-150
                     ${nivel === n
                       ? "bg-brand/10 border-brand/30 text-brand"
-                      : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-600"
+                      : "bg-gray-50 dark:bg-slate-600 border-gray-200 dark:border-slate-500 text-gray-500 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-400"
                     }`}
                 >
                   {n}
@@ -255,7 +255,7 @@ export default function ConteudoAula() {
                   className={`flex-1 py-2 text-xs font-medium rounded-lg border transition-all duration-150
                     ${ambiente === a
                       ? "bg-brand/10 border-brand/30 text-brand"
-                      : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400"
+                      : "bg-gray-50 dark:bg-slate-600 border-gray-200 dark:border-slate-500 text-gray-500 dark:text-slate-400"
                     }`}
                 >
                   {a}
@@ -293,7 +293,7 @@ export default function ConteudoAula() {
         </div>
 
         {/* Painel de resultado */}
-        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5 flex flex-col min-h-0">
+        <div className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl p-5 flex flex-col min-h-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-gray-800 dark:text-slate-200">Conteúdo Gerado</h2>
             {conteudo && (
@@ -302,7 +302,7 @@ export default function ConteudoAula() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-150
                   ${copiado
                     ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                    : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-600"
+                    : "bg-gray-50 dark:bg-slate-600 border-gray-200 dark:border-slate-500 text-gray-500 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-400"
                   }`}
               >
                 {copiado ? <Check size={13} /> : <Copy size={13} />}
@@ -315,7 +315,7 @@ export default function ConteudoAula() {
             readOnly
             value={conteudo}
             placeholder="O conteúdo gerado aparecerá aqui."
-            className="flex-1 min-h-0 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg p-4 text-sm text-gray-800 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-600 font-mono resize-none focus:outline-none leading-relaxed"
+            className="flex-1 min-h-0 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-4 text-sm text-gray-800 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-400 font-mono resize-none focus:outline-none leading-relaxed"
           />
 
           <div className="flex items-center gap-2 mt-3 text-xs text-gray-400 dark:text-slate-500">
