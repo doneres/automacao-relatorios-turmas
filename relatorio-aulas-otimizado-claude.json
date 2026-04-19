@@ -1,0 +1,418 @@
+{
+  "name": "relatorio-aulas-otimizado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d880dbd4-ec23-4ad3-84c8-4a3e619e14d4",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1600,
+        768
+      ],
+      "id": "f8649e0c-a047-4e23-9abe-894e9ed07ef3",
+      "name": "Webhook1",
+      "webhookId": "d880dbd4-ec23-4ad3-84c8-4a3e619e14d4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.body.transcricao;\n\nconst limpo = raw\n  .replace(/^\\d+$/gm, '')\n  .replace(/\\d{2}:\\d{2}:\\d{2},\\d{3} --> \\d{2}:\\d{2}:\\d{2},\\d{3}/g, '')\n  .replace(/\\n{2,}/g, '\\n')\n  .split('\\n')\n  .map(l => l.trim())\n  .filter(l => l.length > 3)\n  .join(' ');\n\nconst transcricaoLimitada = limpo.length > 6000 ? limpo.slice(0, 6000) + '...' : limpo;\n\nreturn [{\n  json: {\n    turma:       $input.first().json.body.turma,\n    linkLoom:    $input.first().json.body.linkLoom,\n    linkSlides:  $input.first().json.body.linkSlides,\n    transcricao: transcricaoLimitada,\n    data:        new Date().toLocaleDateString('pt-BR')\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        768
+      ],
+      "id": "8acdd593-4a6d-4c98-8f74-ba97a9ff1108",
+      "name": "Limpa SRT"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extraia da transcrição abaixo APENAS o JSON, sem texto fora dele, sem markdown, sem explicações.\n\nRetorne exatamente este formato:\n{\n  \"tema\": \"título da aula em até 8 palavras\",\n  \"conceitos\": [\"conceito 1\", \"conceito 2\", \"conceito 3\"],\n  \"ferramentas\": [\"ferramenta ou tecnologia 1\", \"ferramenta 2\"],\n  \"atividade_aula\": \"o que foi praticado em sala descrito em 1 frase objetiva\",\n  \"ferramenta_principal\": \"a ferramenta ou tecnologia mais importante mencionada\"\n}\n\nRegras:\n- Descarte: conversas paralelas, disciplina de alunos, repetições, ruídos\n- Máximo 3 conceitos e 3 ferramentas\n- Todos os campos são obrigatórios\n\nTranscrição:\n{{ $json.transcricao }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1888,
+        768
+      ],
+      "id": "4c19906f-3faa-4f8c-bc68-de554c11ec36",
+      "name": "Haiku - Extrai JSON da aula"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1856,
+        976
+      ],
+      "id": "6dacfc43-1274-4bea-97f2-52f8ce4bb24a",
+      "name": "Haiku Model - Extração",
+      "credentials": {
+        "anthropicApi": {
+          "id": "thmy2zEkGya9b5LM",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const textoJson = $input.first().json.text ?? '';\n\nlet dados;\ntry {\n  const limpo = textoJson.replace(/```json/gi, '').replace(/```/g, '').trim();\n  dados = JSON.parse(limpo);\n} catch (e) {\n  dados = {\n    tema: 'Aula de tecnologia',\n    conceitos: ['conceito principal'],\n    ferramentas: ['ferramenta principal'],\n    atividade_aula: 'Atividade prática realizada em aula',\n    ferramenta_principal: 'ferramenta'\n  };\n}\n\nconst anterior = $('Limpa SRT').first().json;\n\nreturn [{\n  json: {\n    turma:                anterior.turma,\n    data:                 anterior.data,\n    linkLoom:             anterior.linkLoom,\n    linkSlides:           anterior.linkSlides,\n    tema:                 dados.tema,\n    conceitos:            (dados.conceitos ?? []).join(', '),\n    ferramentas:          (dados.ferramentas ?? []).join(', '),\n    atividade_aula:       dados.atividade_aula,\n    ferramenta_principal: dados.ferramenta_principal,\n    query1:               `${dados.tema} tutorial português`,\n    query2:               `${dados.ferramenta_principal} documentação oficial`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        768
+      ],
+      "id": "c7f4b647-45bf-4460-9a7b-06b9f832d63f",
+      "name": "Parse JSON e monta queries"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "serpApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.query1 }}"
+            },
+            {
+              "name": "hl",
+              "value": "pt"
+            },
+            {
+              "name": "gl",
+              "value": "br"
+            },
+            {
+              "name": "num",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2320,
+        608
+      ],
+      "id": "d27e2ea3-ac29-473f-ba36-3c94b86c9e83",
+      "name": "SerpAPI - Busca 1",
+      "credentials": {
+        "serpApi": {
+          "id": "Ktt7AK14LlLIZTga",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "serpApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Parse JSON e monta queries').first().json.query2 }}"
+            },
+            {
+              "name": "hl",
+              "value": "pt"
+            },
+            {
+              "name": "gl",
+              "value": "br"
+            },
+            {
+              "name": "num",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2320,
+        896
+      ],
+      "id": "8d3aa321-b2d5-4d15-8f09-9f5329125da4",
+      "name": "SerpAPI - Busca 2",
+      "credentials": {
+        "serpApi": {
+          "id": "Ktt7AK14LlLIZTga",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2496,
+        768
+      ],
+      "id": "ca53780c-dd2d-4b72-b586-970f6eea61d7",
+      "name": "Merge Buscas"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Após o Merge, temos 2 items: index 0 = Busca 1, index 1 = Busca 2\nconst items = $input.all();\n\nconst extrairLinks = (item) => {\n  const resultados = item?.json?.organic_results ?? [];\n  return resultados.slice(0, 2).map(r => `- [${r.title}](${r.link})`).join('\\n');\n};\n\nconst links1 = items[0] ? extrairLinks(items[0]) : '';\nconst links2 = items[1] ? extrairLinks(items[1]) : '';\n\nconst linksFormatados = [links1, links2].filter(l => l.length > 0).join('\\n');\n\n// Recupera os dados do contexto salvo antes das buscas\nconst base = $('Parse JSON e monta queries').first().json;\n\nreturn [{\n  json: {\n    ...base,\n    linksSerp: linksFormatados || '- Nenhum link encontrado na busca'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2656,
+        768
+      ],
+      "id": "cd6eb3a1-8484-4737-b333-0817db84aac3",
+      "name": "Formata links SerpAPI"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é o Prof. Douglas, professor de tecnologia e desenvolvimento de jogos.\nEscreva APENAS o relatório no template abaixo, em Markdown, português brasileiro, sem emojis.\nLinguagem direta e técnica. Proibido: \"mergulhamos\", \"fascinante\", \"incrível\", \"empolgante\", elogios vagos.\nUse primeira pessoa do plural quando necessário: \"vimos\", \"fizemos\", \"trabalhamos\".\n\nDADOS DA AULA:\n- Turma: {{ $json.turma }}\n- Data: {{ $json.data }}\n- Tema: {{ $json.tema }}\n- Conceitos trabalhados: {{ $json.conceitos }}\n- Ferramentas usadas: {{ $json.ferramentas }}\n- Atividade feita em aula: {{ $json.atividade_aula }}\n- Gravação: {{ $json.linkLoom }}\n- Slides: {{ $json.linkSlides }}\n\nLINKS REAIS PARA CONTEÚDOS EXTRAS (use exatamente estes, sem inventar, sem alterar URLs):\n{{ $json.linksSerp }}\n\nPreencha o template abaixo. Não adicione nenhum texto fora dele:\n\n*{{ $json.turma }}*\n*Data:* {{ $json.data }}\n*Conteúdo:* [título objetivo da aula em 1 linha]\n\n*Objetivos da aula:*\n- [4 a 6 objetivos, verbo no infinitivo: \"Entender\", \"Aplicar\", \"Criar\", \"Configurar\", \"Implementar\"]\n\n*Link da aula:* {{ $json.linkLoom }}\n*Slides:* {{ $json.linkSlides }}\n\n*Atividade de casa:*\n\n*Teoria:* [1 parágrafo técnico e direto explicando o conceito central — sem floreios]\n\n*Prática:*\n1. [passo — use um cenário DIFERENTE do feito em aula, mesmo conceito em contexto novo]\n2. [passo]\n3. [passo]\n4. [passo]\n\n*Conteúdos extras:*\n{{ $json.linksSerp }}\n\nProf. Douglas",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2800,
+        768
+      ],
+      "id": "71336316-edc8-4e13-b309-bf48b24267b5",
+      "name": "Haiku - Gera Relatório"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2912,
+        976
+      ],
+      "id": "b3eaf99d-acdc-4c7c-abda-49eb37ee1d8d",
+      "name": "Haiku Model - Relatório",
+      "credentials": {
+        "anthropicApi": {
+          "id": "thmy2zEkGya9b5LM",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const relatorio = $input.first().json.text ?? '';\n\nreturn [{\n  json: {\n    relatorio: relatorio.trim()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3088,
+        768
+      ],
+      "id": "bb8e87ed-66a5-478e-9969-2e3bad1f3e46",
+      "name": "Formata saida"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3232,
+        768
+      ],
+      "id": "a7cfc6db-c2c2-424f-a43b-d41afb898c7f",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Limpa SRT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpa SRT": {
+      "main": [
+        [
+          {
+            "node": "Haiku - Extrai JSON da aula",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Haiku Model - Extração": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Haiku - Extrai JSON da aula",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Haiku - Extrai JSON da aula": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON e monta queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON e monta queries": {
+      "main": [
+        [
+          {
+            "node": "SerpAPI - Busca 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SerpAPI - Busca 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI - Busca 1": {
+      "main": [
+        [
+          {
+            "node": "Merge Buscas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI - Busca 2": {
+      "main": [
+        [
+          {
+            "node": "Merge Buscas",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Buscas": {
+      "main": [
+        [
+          {
+            "node": "Formata links SerpAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formata links SerpAPI": {
+      "main": [
+        [
+          {
+            "node": "Haiku - Gera Relatório",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Haiku Model - Relatório": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Haiku - Gera Relatório",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Haiku - Gera Relatório": {
+      "main": [
+        [
+          {
+            "node": "Formata saida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formata saida": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e63da1ff-d9c2-4e10-b92c-bc3ad61f9426",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1a9059f09c62ee60e2bc113ad4bf8104044a15e5658903b74079444f1bd65099"
+  },
+  "id": "rtHEHIoGljn1qdH7",
+  "tags": []
+}

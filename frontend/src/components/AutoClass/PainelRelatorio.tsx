@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTheme } from "../../contexts/ThemeContext";
+import { Copy, Check, FileText } from "lucide-react";
 
 interface Props {
   relatorio: string;
@@ -7,7 +7,6 @@ interface Props {
 }
 
 export default function PainelRelatorio({ relatorio, loading }: Props) {
-  const { colors, mode } = useTheme();
   const [copiado, setCopiado] = useState(false);
 
   const copiar = async () => {
@@ -17,81 +16,22 @@ export default function PainelRelatorio({ relatorio, loading }: Props) {
   };
 
   return (
-    <div
-      style={{
-        background:
-          mode === "light"
-            ? colors.card
-            : "linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(247,147,30,0.05) 100%)",
-        borderRadius: 14,
-        border:
-          mode === "light"
-            ? `1px solid ${colors.border}`
-            : "1px solid rgba(255,107,53,0.2)",
-        padding: 16,
-        display: "flex",
-        flexDirection: "column",
-        boxSizing: "border-box",
-        minHeight: 0,
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 18,
-            fontWeight: 700,
-            color: colors.text.primary,
-            margin: 0,
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <i className="bi bi-file-earmark-text"></i>
-          Relatório
-        </h2>
+    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5 flex flex-col min-h-0">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <FileText size={16} className="text-gray-400 dark:text-slate-400" />
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-slate-200">Relatório</h2>
+        </div>
         {relatorio && (
           <button
             onClick={copiar}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background:
-                mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.1)",
-              border:
-                mode === "light"
-                  ? `1px solid ${colors.border}`
-                  : "1px solid rgba(255, 107, 53, 0.3)",
-              borderRadius: 8,
-              padding: "8px 12px",
-              fontSize: 12,
-              fontWeight: 600,
-              color: copiado ? "#4ade80" : colors.accentPrimary,
-              cursor: "pointer",
-              fontFamily: "inherit",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = `${mode === "light" ? "#eff2f5" : "rgba(255, 107, 53, 0.15)"}`;
-              e.currentTarget.style.borderColor = colors.accentPrimary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = `${mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.1)"}`;
-              e.currentTarget.style.borderColor = `${mode === "light" ? colors.border : "rgba(255, 107, 53, 0.3)"}`;
-            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-150
+              ${copiado
+                ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-600"
+              }`}
           >
-            <i
-              className={`bi ${copiado ? "bi-check-circle" : "bi-clipboard"}`}
-            ></i>
+            {copiado ? <Check size={13} /> : <Copy size={13} />}
             {copiado ? "Copiado!" : "Copiar"}
           </button>
         )}
@@ -101,69 +41,21 @@ export default function PainelRelatorio({ relatorio, loading }: Props) {
         readOnly
         value={relatorio}
         placeholder="Ao gerar o relatório, o resultado aparecerá aqui."
-        style={{
-          flex: 1,
-          minHeight: 0,
-          resize: "vertical",
-          border:
-            mode === "light"
-              ? `1px solid ${colors.border}`
-              : "1px solid rgba(255, 107, 53, 0.2)",
-          borderRadius: 10,
-          padding: 16,
-          fontSize: 13,
-          lineHeight: 1.6,
-          fontFamily: "'Menlo', 'Courier New', monospace",
-          color: relatorio ? colors.text.primary : colors.text.tertiary,
-          background:
-            mode === "light" ? colors.bg.tertiary : "rgba(0, 0, 0, 0.2)",
-          outline: "none",
-          boxSizing: "border-box",
-          transition: "all 0.3s ease",
-        }}
-        onFocus={(e) => {
-          e.currentTarget.style.borderColor = colors.accentPrimary;
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.borderColor =
-            mode === "light" ? colors.border : "rgba(255, 107, 53, 0.2)";
-        }}
+        className="flex-1 min-h-0 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg p-4 text-sm text-gray-800 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-600 font-mono resize-none focus:outline-none leading-relaxed"
       />
 
-      <div
-        style={{
-          marginTop: 12,
-          fontSize: 12,
-          color: loading ? colors.accentPrimary : colors.text.secondary,
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          transition: "color 0.3s ease",
-        }}
-      >
+      <div className="flex items-center gap-2 mt-3 text-xs text-gray-400 dark:text-slate-500">
         <span
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: loading ? colors.accentPrimary : "#4ade80",
-            display: "inline-block",
-            animation: loading ? "pulse 2s ease-in-out infinite" : "none",
-          }}
+          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+            loading ? "bg-brand animate-pulse" : relatorio ? "bg-emerald-400" : "bg-gray-300 dark:bg-slate-600"
+          }`}
         />
         {loading
           ? "Processando, aguarde..."
           : relatorio
-            ? "Relatório gerado com sucesso!"
-            : "O resultado será exibido aqui."}
+          ? "Relatório gerado com sucesso."
+          : "O resultado será exibido aqui."}
       </div>
-
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.6; }
-        }
-      `}</style>
     </div>
   );
 }

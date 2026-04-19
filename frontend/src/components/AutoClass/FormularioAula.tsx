@@ -1,6 +1,6 @@
+import { AlertTriangle, Zap, Loader2 } from "lucide-react";
 import type { Ambiente, DadosAula } from "./types";
 import { AMBIENTE_CONFIG } from "./types";
-import { useTheme } from "../../contexts/ThemeContext";
 import UploadSrt from "./UploadSrt";
 
 interface Props {
@@ -12,284 +12,83 @@ interface Props {
   erro: string;
 }
 
-export default function FormularioAula({
-  dados,
-  onChange,
-  onErro,
-  onGerar,
-  loading,
-  erro,
-}: Props) {
-  const { colors, mode } = useTheme();
+const inputCls =
+  "w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-colors";
+
+const labelCls =
+  "block text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1.5";
+
+export default function FormularioAula({ dados, onChange, onErro, onGerar, loading, erro }: Props) {
   const amb = AMBIENTE_CONFIG[dados.ambiente];
 
   return (
-    <div
-      style={{
-        background:
-          mode === "light"
-            ? colors.card
-            : "linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(247,147,30,0.05) 100%)",
-        borderRadius: 14,
-        border:
-          mode === "light"
-            ? `1px solid ${colors.border}`
-            : "1px solid rgba(255,107,53,0.2)",
-        padding: 16,
-        boxSizing: "border-box",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0,
-        overflow: "auto",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: 18,
-          fontWeight: 700,
-          color: colors.text.primary,
-          margin: "0 0 6px",
-        }}
-      >
-        Dados da Aula
-      </h2>
-      <p
-        style={{
-          fontSize: 13,
-          color: colors.text.secondary,
-          margin: "0 0 24px",
-        }}
-      >
-        Preencha os campos abaixo para iniciar.
-      </p>
+    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5 flex flex-col gap-4 overflow-y-auto">
+      <div>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Dados da Aula</h2>
+        <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Preencha os campos abaixo para iniciar.</p>
+      </div>
 
       {/* Ambiente */}
-      <div style={{ marginBottom: 16 }}>
-        <label
-          style={{
-            display: "block",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: 0.5,
-            color: colors.text.secondary,
-            marginBottom: 6,
-            textTransform: "uppercase",
-          }}
-        >
-          Ambiente
-        </label>
+      <div>
+        <label className={labelCls}>Ambiente</label>
         <select
           value={dados.ambiente}
           onChange={(e) => onChange({ ambiente: e.target.value as Ambiente })}
-          style={
-            {
-              width: "100%",
-              padding: "12px 14px",
-              border: `1px solid ${colors.border}`,
-              borderRadius: 10,
-              fontSize: 14,
-              fontFamily: "inherit",
-              color: colors.text.primary,
-              background:
-                mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.05)",
-              boxSizing: "border-box",
-              transition: "all 0.3s ease",
-              appearance: "none",
-              cursor: "pointer",
-              paddingRight: 36,
-              backgroundImage:
-                mode === "light"
-                  ? "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231a1f2e' d='M1 1l5 5 5-5'/%3E%3C/svg%3E\")"
-                  : "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23e8ecf1' d='M1 1l5 5 5-5'/%3E%3C/svg%3E\")",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 12px center",
-            } as React.CSSProperties
-          }
+          className={`${inputCls} cursor-pointer appearance-none`}
         >
           {(Object.keys(AMBIENTE_CONFIG) as Ambiente[]).map((a) => (
-            <option key={a} value={a}>
+            <option key={a} value={a} className="bg-white dark:bg-slate-800">
               {AMBIENTE_CONFIG[a].label}
             </option>
           ))}
         </select>
-        <span
-          style={{
-            display: "inline-block",
-            marginTop: 8,
-            fontSize: 11,
-            fontWeight: 600,
-            padding: "4px 12px",
-            borderRadius: 20,
-            color: amb.color,
-            background: amb.bg,
-          }}
-        >
-          • {amb.badge}
+        <span className={`inline-flex items-center gap-1 mt-1.5 text-xs font-semibold px-2 py-0.5 rounded-md ${amb.bgClass} ${amb.textClass}`}>
+          {amb.badge}
         </span>
       </div>
 
       {/* Turma */}
-      <div style={{ marginBottom: 16 }}>
-        <label
-          style={{
-            display: "block",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: 0.5,
-            color: colors.text.secondary,
-            marginBottom: 6,
-            textTransform: "uppercase",
-          }}
-        >
-          Turma
-        </label>
+      <div>
+        <label className={labelCls}>Turma</label>
         <input
           type="text"
           placeholder="#0000 - CY3"
           value={dados.turma}
           onChange={(e) => onChange({ turma: e.target.value })}
-          style={
-            {
-              width: "100%",
-              padding: "12px 14px",
-              border: `1px solid ${colors.border}`,
-              borderRadius: 10,
-              fontSize: 14,
-              fontFamily: "inherit",
-              color: colors.text.primary,
-              background:
-                mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.05)",
-              boxSizing: "border-box",
-              transition: "all 0.3s ease",
-            } as React.CSSProperties
-          }
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = colors.accentPrimary;
-            e.currentTarget.style.background = `${mode === "light" ? "#ffffff" : "rgba(255, 107, 53, 0.1)"}`;
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = colors.border;
-            e.currentTarget.style.background = `${mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.05)"}`;
-          }}
+          className={inputCls}
         />
       </div>
 
       {/* Link Loom */}
-      <div style={{ marginBottom: 16 }}>
-        <label
-          style={{
-            display: "block",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: 0.5,
-            color: colors.text.secondary,
-            marginBottom: 6,
-            textTransform: "uppercase",
-          }}
-        >
-          Link da Gravação (Loom)
-        </label>
+      <div>
+        <label className={labelCls}>Link da Gravação (Loom)</label>
         <input
           type="url"
           placeholder="https://www.loom.com/share/..."
           value={dados.linkLoom}
           onChange={(e) => onChange({ linkLoom: e.target.value })}
-          style={
-            {
-              width: "100%",
-              padding: "12px 14px",
-              border: `1px solid ${colors.border}`,
-              borderRadius: 10,
-              fontSize: 14,
-              fontFamily: "inherit",
-              color: colors.text.primary,
-              background:
-                mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.05)",
-              boxSizing: "border-box",
-              transition: "all 0.3s ease",
-            } as React.CSSProperties
-          }
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = colors.accentPrimary;
-            e.currentTarget.style.background = `${mode === "light" ? "#ffffff" : "rgba(255, 107, 53, 0.1)"}`;
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = colors.border;
-            e.currentTarget.style.background = `${mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.05)"}`;
-          }}
+          className={inputCls}
         />
       </div>
 
       {/* Link Slides */}
-      <div style={{ marginBottom: 16 }}>
-        <label
-          style={{
-            display: "block",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: 0.5,
-            color: colors.text.secondary,
-            marginBottom: 6,
-            textTransform: "uppercase",
-          }}
-        >
+      <div>
+        <label className={labelCls}>
           Link dos Slides{" "}
-          <span
-            style={{
-              color: colors.text.tertiary,
-              fontWeight: 400,
-              textTransform: "none",
-            }}
-          >
-            (opcional)
-          </span>
+          <span className="normal-case text-gray-300 dark:text-slate-600 font-normal">(opcional)</span>
         </label>
         <input
           type="url"
           placeholder="https://docs.google.com/presentation/..."
           value={dados.linkSlides}
           onChange={(e) => onChange({ linkSlides: e.target.value })}
-          style={
-            {
-              width: "100%",
-              padding: "12px 14px",
-              border: `1px solid ${colors.border}`,
-              borderRadius: 10,
-              fontSize: 14,
-              fontFamily: "inherit",
-              color: colors.text.primary,
-              background:
-                mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.05)",
-              boxSizing: "border-box",
-              transition: "all 0.3s ease",
-            } as React.CSSProperties
-          }
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = colors.accentPrimary;
-            e.currentTarget.style.background = `${mode === "light" ? "#ffffff" : "rgba(255, 107, 53, 0.1)"}`;
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = colors.border;
-            e.currentTarget.style.background = `${mode === "light" ? "#f5f7fa" : "rgba(255, 107, 53, 0.05)"}`;
-          }}
+          className={inputCls}
         />
       </div>
 
       {/* Upload SRT */}
-      <div style={{ marginBottom: 16 }}>
-        <label
-          style={{
-            display: "block",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: 0.5,
-            color: colors.text.secondary,
-            marginBottom: 6,
-            textTransform: "uppercase",
-          }}
-        >
-          Transcrição (.SRT)
-        </label>
+      <div>
+        <label className={labelCls}>Transcrição (.SRT)</label>
         <UploadSrt
           arquivo={dados.arquivo}
           onArquivo={(f) => onChange({ arquivo: f })}
@@ -299,25 +98,9 @@ export default function FormularioAula({
 
       {/* Erro */}
       {erro && (
-        <div
-          style={{
-            color: "#ff6b6b",
-            fontSize: 13,
-            marginBottom: 16,
-            padding: "12px 14px",
-            background: "rgba(255, 107, 107, 0.1)",
-            borderRadius: 10,
-            border: "1px solid rgba(255, 107, 107, 0.2)",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <i
-            className="bi bi-exclamation-triangle"
-            style={{ fontSize: 16 }}
-          ></i>
-          {erro}
+        <div className="flex items-start gap-2 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/25 rounded-lg px-3 py-2.5 text-rose-600 dark:text-rose-400 text-sm">
+          <AlertTriangle size={15} className="shrink-0 mt-0.5" />
+          <span>{erro}</span>
         </div>
       )}
 
@@ -325,62 +108,20 @@ export default function FormularioAula({
       <button
         onClick={onGerar}
         disabled={loading}
-        style={{
-          width: "100%",
-          padding: "13px",
-          borderRadius: 10,
-          border: "none",
-          background: loading
-            ? "linear-gradient(135deg, #ff8c42 0%, #ffb366 100%)"
-            : "linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)",
-          color: "#fff",
-          fontFamily: "inherit",
-          fontSize: 15,
-          fontWeight: 600,
-          cursor: loading ? "not-allowed" : "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-          transition: "all 0.3s ease",
-          opacity: loading ? 0.8 : 1,
-        }}
-        onMouseEnter={(e) => {
-          if (!loading) {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow =
-              "0 12px 32px rgba(255,107,53,0.4)";
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = "none";
-        }}
+        className="flex items-center justify-center gap-2 w-full py-3 bg-brand-gradient hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-lg transition-all duration-150 mt-auto shadow-sm"
       >
         {loading ? (
           <>
-            <span
-              style={{
-                display: "inline-block",
-                width: 16,
-                height: 16,
-                border: "2px solid #fff",
-                borderTopColor: "transparent",
-                borderRadius: "50%",
-                animation: "spin 0.8s linear infinite",
-              }}
-            />
-            Gerando...
+            <Loader2 size={16} className="animate-spin" />
+            Gerando relatório...
           </>
         ) : (
           <>
-            <i className="bi bi-lightning"></i>
+            <Zap size={16} />
             Gerar Relatório
           </>
         )}
       </button>
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

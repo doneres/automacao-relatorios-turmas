@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Tokens de tema ───────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Modo Claro */
+    --background:       249 250 251;   /* gray-50  */
+    --card:             255 255 255;   /* white    */
+    --muted:            243 244 246;   /* gray-100 */
+    --input:            243 244 246;   /* gray-100 */
+    --border:           229 231 235;   /* gray-200 */
+    --foreground:       17  24  39;    /* gray-900 */
+    --muted-foreground: 107 114 128;   /* gray-500 */
+  }
+
+  html.dark {
+    /* Modo Escuro */
+    --background:       2   6   23;    /* slate-950 */
+    --card:             15  23  42;    /* slate-900 */
+    --muted:            30  41  59;    /* slate-800 */
+    --input:            30  41  59;    /* slate-800 */
+    --border:           30  41  59;    /* slate-800 */
+    --foreground:       241 245 249;   /* slate-100 */
+    --muted-foreground: 148 163 184;   /* slate-400 */
+  }
+
+  html, body, #root {
+    height: 100%;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Scrollbar */
+  * { scrollbar-width: thin; scrollbar-color: rgb(var(--border)) transparent; }
+  *::-webkit-scrollbar { width: 5px; height: 5px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background: rgb(var(--border));
+    border-radius: 4px;
+  }
+}

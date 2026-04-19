@@ -2,97 +2,44 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 
-export type ThemeMode = "light" | "dark";
-
 interface ThemeContextType {
-  mode: ThemeMode;
+  isDark: boolean;
   toggleTheme: () => void;
-  colors: {
-    bg: {
-      primary: string;
-      secondary: string;
-      tertiary: string;
-    };
-    text: {
-      primary: string;
-      secondary: string;
-      tertiary: string;
-    };
-    border: string;
-    card: string;
-    accentPrimary: string;
-    accentSecondary: string;
-  };
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function applyTheme(dark: boolean) {
+  if (dark) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [mode, setMode] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem("theme-mode");
-    return (saved as ThemeMode) || "light";
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    // Padrão: CLARO. Só escuro se o usuário salvou explicitamente.
+    const saved = localStorage.getItem("cp-theme");
+    const dark = saved === "dark";
+    applyTheme(dark); // aplica ANTES da primeira renderização
+    return dark;
   });
 
   useEffect(() => {
-    localStorage.setItem("theme-mode", mode);
-  }, [mode]);
-
-  const colors = {
-    light: {
-      bg: {
-        primary: "#ffffff",
-        secondary: "#f5f7fa",
-        tertiary: "#eff2f5",
-      },
-      text: {
-        primary: "#1a1f2e",
-        secondary: "#5a6370",
-        tertiary: "#8a9199",
-      },
-      border: "#e1e5eb",
-      card: "#ffffff",
-      accentPrimary: "#ff6b35",
-      accentSecondary: "#f7931e",
-    },
-    dark: {
-      bg: {
-        primary: "#0f1419",
-        secondary: "#1a1f2e",
-        tertiary: "#242a37",
-      },
-      text: {
-        primary: "#e8ecf1",
-        secondary: "#a0a5b5",
-        tertiary: "#737982",
-      },
-      border: "rgba(255, 107, 53, 0.2)",
-      card: "rgba(255, 107, 53, 0.1)",
-      accentPrimary: "#ff6b35",
-      accentSecondary: "#f7931e",
-    },
-  };
-
-  const toggleTheme = () => {
-    setMode((prev) => (prev === "light" ? "dark" : "light"));
-  };
+    applyTheme(isDark);
+    localStorage.setItem("cp-theme", isDark ? "dark" : "light");
+  }, [isDark]);
 
   return (
-    <ThemeContext.Provider
-      value={{
-        mode,
-        toggleTheme,
-        colors: colors[mode],
-      }}
-    >
+    <ThemeContext.Provider value={{ isDark, toggleTheme: () => setIsDark((d) => !d) }}>
       {children}
     </ThemeContext.Provider>
   );
 };
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within ThemeProvider");
-  }
-  return context;
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+  return ctx;
 };

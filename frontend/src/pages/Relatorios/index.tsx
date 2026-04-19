@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { FileText } from "lucide-react";
 import type { DadosAula } from "../../components/AutoClass/types";
-import { N8N_WEBHOOKS } from "../../components/AutoClass/types";
-import { useTheme } from "../../contexts/ThemeContext";
+import { getWebhooksRelatorio } from "../../lib/storage";
 import FormularioAula from "../../components/AutoClass/FormularioAula";
 import PainelRelatorio from "../../components/AutoClass/PainelRelatorio";
 
@@ -14,7 +14,6 @@ const DADOS_INICIAIS: DadosAula = {
 };
 
 export default function Relatorios() {
-  const { colors, mode } = useTheme();
   const [dados, setDados] = useState<DadosAula>(DADOS_INICIAIS);
   const [relatorio, setRelatorio] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,11 +42,11 @@ export default function Relatorios() {
         transcricao: srtContent,
       };
 
-      const webhook = N8N_WEBHOOKS[dados.ambiente];
+      const webhooks = getWebhooksRelatorio();
+      const webhook = webhooks[dados.ambiente];
       if (!webhook)
-        throw new Error(`Webhook não configurado para ${dados.ambiente}`);
+        throw new Error(`Webhook não configurado para ${dados.ambiente}. Configure em Configurações > Ambientes.`);
 
-      // Timeout de 5 minutos (AI pode demorar)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
 
@@ -63,47 +62,31 @@ export default function Relatorios() {
         clearTimeout(timeoutId);
       }
 
-      // Lê como texto primeiro para debugar
       const rawText = await res.text();
 
-      if (!res.ok) {
-        throw new Error(
-          `N8N retornou status ${res.status}: ${rawText || "(sem corpo)"}`,
-        );
-      }
+      if (!res.ok)
+        throw new Error(`N8N retornou status ${res.status}: ${rawText || "(sem corpo)"}`);
 
-      if (!rawText || rawText.trim() === "") {
-        throw new Error(
-          "N8N retornou resposta vazia. Verifique se o nó 'Respond to Webhook' está no final do workflow e se o workflow está publicado (não em modo teste).",
-        );
-      }
+      if (!rawText || rawText.trim() === "")
+        throw new Error("N8N retornou resposta vazia. Verifique se o nó 'Respond to Webhook' está no final do workflow.");
 
       let data: Record<string, unknown>;
       try {
         data = JSON.parse(rawText);
       } catch {
-        throw new Error(
-          `N8N retornou resposta inválida (não é JSON):\n${rawText.slice(0, 200)}`,
-        );
+        throw new Error(`N8N retornou resposta inválida (não é JSON):\n${rawText.slice(0, 200)}`);
       }
 
       const texto = data.relatorio ?? data.output ?? data.text;
-      if (!texto || typeof texto !== "string") {
-        throw new Error(
-          `Campo 'relatorio' não encontrado. Resposta recebida:\n${JSON.stringify(data, null, 2)}`,
-        );
-      }
+      if (!texto || typeof texto !== "string")
+        throw new Error(`Campo 'relatorio' não encontrado. Resposta:\n${JSON.stringify(data, null, 2)}`);
 
       setRelatorio(texto);
     } catch (e: unknown) {
       if (e instanceof Error && e.name === "AbortError") {
-        setErro(
-          "Timeout: o N8N demorou mais de 5 minutos para responder. Verifique o workflow.",
-        );
+        setErro("Timeout: o N8N demorou mais de 5 minutos. Verifique o workflow.");
       } else {
-        setErro(
-          `Falha: ${e instanceof Error ? e.message : "erro desconhecido"}`,
-        );
+        setErro(`Falha: ${e instanceof Error ? e.message : "erro desconhecido"}`);
       }
     } finally {
       setLoading(false);
@@ -111,61 +94,20 @@ export default function Relatorios() {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        background:
-          mode === "light"
-            ? `linear-gradient(135deg, ${colors.bg.secondary} 0%, ${colors.bg.tertiary} 100%)`
-            : `linear-gradient(135deg, ${colors.bg.primary} 0%, ${colors.bg.secondary} 100%)`,
-        padding: "20px 16px",
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-        color: colors.text.primary,
-        boxSizing: "border-box",
-        overflow: "hidden",
-      }}
-    >
+    <div className="h-full flex flex-col p-6 lg:p-8">
       {/* Header */}
-      <div style={{ maxWidth: 1200, margin: "0 auto 16px" }}>
-        <h1
-          style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: colors.text.primary,
-            margin: "0 0 4px",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <i
-            className="bi bi-file-earmark-text"
-            style={{ color: colors.accentPrimary, fontSize: 24 }}
-          ></i>
-          Gerar Relatório
-        </h1>
-        <p style={{ fontSize: 13, color: colors.text.secondary, margin: 0 }}>
-          Preencha os dados da aula e envie a transcrição para gerar um
-          relatório inteligente
+      <div className="mb-6">
+        <div className="flex items-center gap-2.5 mb-1">
+          <FileText size={20} className="text-brand" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Gerar Relatório</h1>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-slate-400">
+          Preencha os dados da aula e envie a transcrição para gerar um relatório com IA.
         </p>
       </div>
 
-      {/* Grid Layout */}
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 16,
-          flex: 1,
-          minHeight: 0,
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
+      {/* Grid */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
         <FormularioAula
           dados={dados}
           onChange={handleChange}
@@ -176,15 +118,6 @@ export default function Relatorios() {
         />
         <PainelRelatorio relatorio={relatorio} loading={loading} />
       </div>
-
-      {/* Responsive Breakpoint */}
-      <style>{`
-        @media (max-width: 1024px) {
-          div[style*="gridTemplateColumns"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

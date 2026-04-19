@@ -1,210 +1,172 @@
-import { useNavigate } from "react-router";
-import { useTheme } from "../../contexts/ThemeContext";
+import { Link } from "react-router";
+import { FileText, BookOpen, ArrowRight, ExternalLink, Zap, Users, Layers } from "lucide-react";
+import { getUserName } from "../../lib/storage";
+
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  colorClass,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: React.ElementType;
+  colorClass: string;
+}) {
+  return (
+    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+            {label}
+          </p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-slate-100">{value}</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{sub}</p>
+        </div>
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${colorClass}`}>
+          <Icon size={17} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeatureCard({
+  title,
+  description,
+  to,
+  icon: Icon,
+  accentText,
+  iconBg,
+}: {
+  title: string;
+  description: string;
+  to: string;
+  icon: React.ElementType;
+  accentText: string;
+  iconBg: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="group bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-6 hover:border-gray-300 dark:hover:border-slate-700 hover:shadow-sm transition-all duration-200 flex flex-col"
+    >
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${iconBg}`}>
+        <Icon size={20} className={accentText} />
+      </div>
+      <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100 mb-1.5">{title}</h3>
+      <p className="text-sm text-gray-500 dark:text-slate-400 flex-1 leading-relaxed">{description}</p>
+      <div className={`flex items-center gap-1.5 mt-4 text-sm font-medium ${accentText} opacity-0 group-hover:opacity-100 transition-opacity`}>
+        Acessar
+        <ArrowRight size={14} />
+      </div>
+    </Link>
+  );
+}
 
 export default function Home() {
-  const navigate = useNavigate();
-  const { colors, mode } = useTheme();
+  const nome = getUserName();
+  const hoje = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+  const hora = new Date().getHours();
+  const saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background:
-          mode === "light"
-            ? `linear-gradient(135deg, ${colors.bg.secondary} 0%, ${colors.bg.tertiary} 100%)`
-            : `linear-gradient(135deg, ${colors.bg.primary} 0%, ${colors.bg.secondary} 100%)`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 20px",
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-        color: colors.text.primary,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 900,
-          width: "100%",
-        }}
-      >
+    <div className="p-6 lg:p-8">
+      <div className="max-w-4xl">
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 60 }}>
-          <div
-            style={{
-              fontSize: 64,
-              marginBottom: 24,
-              animation: "float 3s ease-in-out infinite",
-            }}
-          >
-            <i
-              className="bi bi-mortarboard"
-              style={{ color: colors.accentPrimary }}
-            ></i>
-          </div>
-          <h1
-            style={{
-              fontSize: 48,
-              fontWeight: 700,
-              color: colors.text.primary,
-              margin: "0 0 12px",
-              background: "linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            AutoClass
+        <div className="mb-8">
+          <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2 capitalize">
+            {hoje}
+          </p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
+            {saudacao}{nome ? `, ${nome}` : ""}
           </h1>
-          <p
-            style={{
-              fontSize: 16,
-              color: colors.text.secondary,
-              margin: 0,
-            }}
-          >
-            Gere relatórios inteligentes de aulas em segundos com IA
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
+            Automatize relatórios e monte conteúdos de aula com inteligência artificial.
           </p>
         </div>
 
-        {/* Cards Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 24,
-            marginBottom: 40,
-          }}
-        >
-          {[
-            {
-              icon: "bi-file-earmark-text",
-              title: "Relatórios",
-              description: "Gere relatórios profissionais em segundos",
-              path: "/relatorios",
-            },
-            {
-              icon: "bi-lightning",
-              title: "Rápido",
-              description: "Processamento instantâneo com IA avançada",
-              path: null,
-            },
-            {
-              icon: "bi-sliders",
-              title: "Configurações",
-              description: "Personalize suas preferências",
-              path: "/configuracoes",
-            },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              onClick={() => item.path && navigate(item.path)}
-              style={{
-                background:
-                  mode === "light"
-                    ? colors.card
-                    : `linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(247,147,30,0.05) 100%)`,
-                border:
-                  mode === "light"
-                    ? `1px solid ${colors.border}`
-                    : "1px solid rgba(255,107,53,0.2)",
-                borderRadius: 16,
-                padding: 32,
-                cursor: item.path ? "pointer" : "default",
-                transition: "all 0.3s ease",
-                textDecoration: "none",
-                color: "inherit",
-              }}
-              onMouseEnter={(e) => {
-                if (item.path) {
-                  e.currentTarget.style.borderColor = colors.accentPrimary;
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  if (mode === "light") {
-                    e.currentTarget.style.boxShadow =
-                      "0 8px 24px rgba(255,107,53,0.1)";
-                  }
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (item.path) {
-                  e.currentTarget.style.borderColor =
-                    mode === "light" ? colors.border : "rgba(255,107,53,0.2)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 48,
-                  marginBottom: 16,
-                  color: colors.accentPrimary,
-                }}
-              >
-                <i className={`bi ${item.icon}`}></i>
-              </div>
-              <h3
-                style={{
-                  fontSize: 20,
-                  fontWeight: 600,
-                  color: colors.text.primary,
-                  margin: "0 0 8px",
-                }}
-              >
-                {item.title}
-              </h3>
-              <p
-                style={{
-                  fontSize: 14,
-                  color: colors.text.secondary,
-                  margin: 0,
-                  lineHeight: 1.5,
-                }}
-              >
-                {item.description}
-              </p>
-            </div>
-          ))}
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <StatCard
+            label="Ferramentas"
+            value="6+"
+            sub="plataformas disponíveis"
+            icon={Layers}
+            colorClass="bg-brand/10 text-brand"
+          />
+          <StatCard
+            label="Módulos"
+            value="2"
+            sub="recursos ativos"
+            icon={Zap}
+            colorClass="bg-brand/10 text-brand"
+          />
+          <StatCard
+            label="Turmas"
+            value="—"
+            sub="configure no N8N"
+            icon={Users}
+            colorClass="bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500"
+          />
         </div>
 
-        {/* CTA Button */}
-        <div style={{ textAlign: "center" }}>
-          <button
-            onClick={() => navigate("/relatorios")}
-            style={{
-              padding: "14px 32px",
-              fontSize: 15,
-              fontWeight: 600,
-              color: "#fff",
-              background: "linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)",
-              border: "none",
-              borderRadius: 10,
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              boxShadow: "0 8px 24px rgba(255,107,53,0.3)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 12px 32px rgba(255,107,53,0.4)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 8px 24px rgba(255,107,53,0.3)";
-            }}
+        {/* Feature Cards */}
+        <div className="mb-8">
+          <h2 className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-4">
+            Módulos disponíveis
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FeatureCard
+              title="Gerar Relatório"
+              description="Envie a transcrição da aula (.srt) e gere um relatório completo com IA, pronto para enviar aos responsáveis."
+              to="/relatorios"
+              icon={FileText}
+              accentText="text-brand"
+              iconBg="bg-brand/10"
+            />
+            <FeatureCard
+              title="Conteúdo de Aula"
+              description="Selecione a ferramenta e o tema e deixe a IA montar um plano de aula personalizado para a sua turma."
+              to="/conteudo-aula"
+              icon={BookOpen}
+              accentText="text-brand"
+              iconBg="bg-brand/10"
+            />
+          </div>
+        </div>
+
+        {/* Hub Link */}
+        <div>
+          <h2 className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-4">
+            Atalhos
+          </h2>
+          <a
+            href="https://doneres.dev/hub-acesso-rapido/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl px-5 py-4 hover:border-brand/30 hover:shadow-sm transition-all duration-200 w-full max-w-sm"
           >
-            <i className="bi bi-arrow-right" style={{ marginRight: 8 }}></i>
-            Começar Agora
-          </button>
+            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+              <ExternalLink size={16} className="text-gray-400 dark:text-slate-400 group-hover:text-brand transition-colors" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800 dark:text-slate-200 group-hover:text-brand transition-colors">
+                Hub de Acesso Rápido
+              </p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 truncate">doneres.dev/hub-acesso-rapido</p>
+            </div>
+            <ArrowRight size={15} className="text-gray-300 dark:text-slate-600 group-hover:text-brand transition-colors shrink-0" />
+          </a>
         </div>
       </div>
-
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-      `}</style>
     </div>
   );
 }
