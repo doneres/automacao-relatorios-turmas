@@ -23,9 +23,7 @@ services:
       - N8N_HOST=${N8N_HOST}
       - N8N_PORT=${N8N_PORT}
       - WEBHOOK_URL=${WEBHOOK_URL}
-      - EXECUTIONS_MODE=queue
-      - QUEUE_BULL_REDIS_HOST=redis
-      - QUEUE_BULL_REDIS_PORT=6379
+      - EXECUTIONS_MODE=regular
     volumes:
       - n8n_data:/home/node/.n8n
 

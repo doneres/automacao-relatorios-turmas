@@ -121,3 +121,18 @@ export const DEFAULT_LINKS: LinksConfig = {
 
 export const getLinks = (): LinksConfig => get("cp-links", DEFAULT_LINKS);
 export const saveLinks = (links: LinksConfig) => set("cp-links", links);
+
+export interface WhatsappConfig {
+  gruposUrl: string;
+  enviarUrl: string;
+}
+
+export const DEFAULT_WHATSAPP: WhatsappConfig = {
+  gruposUrl: "http://localhost:5678/webhook/grupos-whatsapp",
+  enviarUrl: "http://localhost:5678/webhook/enviar-relatorio",
+};
+
+export const getWhatsappConfig = (): WhatsappConfig =>
+  get("cp-whatsapp", DEFAULT_WHATSAPP);
+export const saveWhatsappConfig = (w: WhatsappConfig) =>
+  set("cp-whatsapp", w);

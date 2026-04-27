@@ -8,6 +8,12 @@ export interface DadosAula {
   arquivo: File | null;
 }
 
+export interface GrupoWhatsapp {
+  id: string;
+  nome: string;
+  foto: string | null;
+}
+
 export const AMBIENTE_CONFIG: Record<
   Ambiente,
   { label: string; badge: string; textClass: string; bgClass: string }
