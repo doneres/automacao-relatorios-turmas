@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText } from "lucide-react";
-import type { DadosAula } from "../../components/AutoClass/types";
-import { getWebhooksRelatorio } from "../../lib/storage";
+import type { DadosAula, GrupoWhatsapp } from "../../components/AutoClass/types";
+import { getWebhooksRelatorio, getWhatsappConfig, getUserName } from "../../lib/storage";
 import FormularioAula from "../../components/AutoClass/FormularioAula";
 import PainelRelatorio from "../../components/AutoClass/PainelRelatorio";
 
@@ -19,8 +19,35 @@ export default function Relatorios() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
 
+  const [grupos, setGrupos] = useState<GrupoWhatsapp[]>([]);
+  const [grupoSelecionado, setGrupoSelecionado] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState("");
+
   const handleChange = (partial: Partial<DadosAula>) => {
     setDados((prev) => ({ ...prev, ...partial }));
+  };
+
+  const carregarGrupos = async () => {
+    try {
+      const config = getWhatsappConfig();
+      const res = await fetch(config.gruposUrl);
+      const data = await res.json();
+      const lista: GrupoWhatsapp[] = data.grupos ?? [];
+      setGrupos(lista);
+
+      const codigoMatch = dados.turma.match(/\d{4,}/);
+      if (codigoMatch) {
+        const codigo = codigoMatch[0];
+        const grupoEncontrado = lista.find((g) => g.nome.includes(codigo));
+        if (grupoEncontrado) {
+          setGrupoSelecionado(grupoEncontrado.id);
+        }
+      }
+    } catch {
+      // falha silenciosa — não bloqueia o relatório
+    }
   };
 
   const handleGerar = async () => {
@@ -40,6 +67,7 @@ export default function Relatorios() {
         linkLoom: dados.linkLoom,
         linkSlides: dados.linkSlides,
         transcricao: srtContent,
+        professor: getUserName(),
       };
 
       const webhooks = getWebhooksRelatorio();
@@ -82,6 +110,7 @@ export default function Relatorios() {
         throw new Error(`Campo 'relatorio' não encontrado. Resposta:\n${JSON.stringify(data, null, 2)}`);
 
       setRelatorio(texto);
+      carregarGrupos();
     } catch (e: unknown) {
       if (e instanceof Error && e.name === "AbortError") {
         setErro("Timeout: o N8N demorou mais de 5 minutos. Verifique o workflow.");
@@ -90,6 +119,38 @@ export default function Relatorios() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (enviado) {
+      const t = setTimeout(() => {
+        setEnviado(false);
+        setGrupoSelecionado("");
+      }, 3000);
+      return () => clearTimeout(t);
+    }
+  }, [enviado]);
+
+  const handleEnviar = async () => {
+    if (!grupoSelecionado || !relatorio) return;
+    setEnviando(true);
+    setErroEnvio("");
+    setEnviado(false);
+    try {
+      const config = getWhatsappConfig();
+      const res = await fetch(config.enviarUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ grupoId: grupoSelecionado, relatorio }),
+      });
+      const data = await res.json();
+      if (data.success) setEnviado(true);
+      else throw new Error("Falha no envio");
+    } catch {
+      setErroEnvio("Não foi possível enviar. Verifique a conexão com o N8N.");
+    } finally {
+      setEnviando(false);
     }
   };
 
@@ -116,7 +177,18 @@ export default function Relatorios() {
           loading={loading}
           erro={erro}
         />
-        <PainelRelatorio relatorio={relatorio} loading={loading} />
+        <PainelRelatorio
+          relatorio={relatorio}
+          onRelatorioChange={setRelatorio}
+          loading={loading}
+          grupos={grupos}
+          grupoSelecionado={grupoSelecionado}
+          onGrupoChange={setGrupoSelecionado}
+          onEnviar={handleEnviar}
+          enviando={enviando}
+          enviado={enviado}
+          erroEnvio={erroEnvio}
+        />
       </div>
     </div>
   );

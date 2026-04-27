@@ -40,10 +40,13 @@ import {
   saveLinks,
   getTools,
   saveTools,
+  getWhatsappConfig,
+  saveWhatsappConfig,
   ICON_OPTIONS,
   type Ferramenta,
   type WebhookConfig,
   type LinksConfig,
+  type WhatsappConfig,
 } from "../../lib/storage";
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -105,11 +108,13 @@ export default function Configuracao() {
   const [whConteudo, setWhConteudo] =
     useState<WebhookConfig>(getWebhooksConteudo);
   const [links, setLinks] = useState<LinksConfig>(getLinks);
+  const [whatsapp, setWhatsapp] = useState<WhatsappConfig>(getWhatsappConfig);
   const [webhookSaved, setWebhookSaved] = useState(false);
   const saveWebhooks = () => {
     saveWebhooksRelatorio(whRelatorio);
     saveWebhooksConteudo(whConteudo);
     saveLinks(links);
+    saveWhatsappConfig(whatsapp);
     setWebhookSaved(true);
     setTimeout(() => setWebhookSaved(false), 2000);
   };
@@ -273,6 +278,40 @@ export default function Configuracao() {
                   />
                 </div>
               ))}
+            </div>
+
+            <div className="pt-4 border-t border-gray-100 dark:border-slate-600">
+              <SectionTitle>WhatsApp</SectionTitle>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+                    URL Grupos
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="http://localhost:5678/webhook/grupos-whatsapp"
+                    value={whatsapp.gruposUrl}
+                    onChange={(e) =>
+                      setWhatsapp({ ...whatsapp, gruposUrl: e.target.value })
+                    }
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+                    URL Envio
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="http://localhost:5678/webhook/enviar-relatorio"
+                    value={whatsapp.enviarUrl}
+                    onChange={(e) =>
+                      setWhatsapp({ ...whatsapp, enviarUrl: e.target.value })
+                    }
+                    className={inputCls}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="pt-4 border-t border-gray-100 dark:border-slate-600">
